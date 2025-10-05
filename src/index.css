@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 240 20% 98%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Pokémon Red */
+    --primary: 0 85% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Electric Yellow */
+    --secondary: 48 100% 50%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 240 10% 95%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Water Blue */
+    --accent: 211 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 90%;
+    --input: 240 10% 90%;
+    --ring: 0 85% 60%;
+
+    --radius: 1rem;
+    
+    /* Pokémon Type Colors */
+    --type-fire: 0 100% 50%;
+    --type-water: 211 100% 50%;
+    --type-grass: 120 60% 50%;
+    --type-electric: 48 100% 50%;
+    --type-psychic: 330 100% 50%;
+    --type-ice: 180 100% 70%;
+    --type-dragon: 260 100% 50%;
+    --type-dark: 0 0% 20%;
+    --type-fairy: 330 100% 70%;
+    --type-normal: 60 20% 70%;
+    --type-fighting: 0 80% 40%;
+    --type-flying: 220 100% 70%;
+    --type-poison: 300 70% 40%;
+    --type-ground: 40 60% 50%;
+    --type-rock: 40 40% 40%;
+    --type-bug: 65 60% 50%;
+    --type-ghost: 270 50% 40%;
+    --type-steel: 220 20% 60%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Team Rocket Dark Theme */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Dark Red */
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Electric Yellow (same) */
+    --secondary: 48 100% 50%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
+
+    /* Purple Accent */
+    --accent: 280 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 0 72% 51%;
+    
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 72% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 0 72% 51%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
