@@ -7,12 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePokemonCollection } from "@/hooks/usePokemonCollection";
 import { useAchievements } from "@/hooks/useAchievements";
-import { Trophy, Star } from "lucide-react";
+import { useBattleHistory } from "@/hooks/useBattleHistory";
+import { Trophy, Star, Swords, Trash2, Crown } from "lucide-react";
 
 const MyPokedex = () => {
   const { collection } = usePokemonCollection();
   const { achievements } = useAchievements();
+  const { history, clearHistory, getStats } = useBattleHistory();
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const battleStats = getStats();
+
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,7 +42,7 @@ const MyPokedex = () => {
                 You have caught {collection.length} Pokémon • {unlockedCount} achievements unlocked
               </p>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
               <div className="flex-1 sm:flex-none bg-primary/10 rounded-xl px-4 sm:px-6 py-3 text-center border-2 border-primary/30">
                 <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-primary mx-auto mb-1" />
                 <p className="text-xl sm:text-2xl font-bold text-foreground">{unlockedCount}</p>
@@ -40,6 +53,11 @@ const MyPokedex = () => {
                 <p className="text-xl sm:text-2xl font-bold text-foreground">{collection.length}</p>
                 <p className="text-xs text-muted-foreground uppercase">Caught</p>
               </div>
+              <div className="flex-1 sm:flex-none bg-accent/10 rounded-xl px-4 sm:px-6 py-3 text-center border-2 border-accent/30">
+                <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-accent mx-auto mb-1" />
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{battleStats.totalBattles}</p>
+                <p className="text-xs text-muted-foreground uppercase">Battles</p>
+              </div>
             </div>
           </div>
 
@@ -47,8 +65,9 @@ const MyPokedex = () => {
         </div>
 
         <Tabs defaultValue="collection" className="space-y-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3">
             <TabsTrigger value="collection">Collection</TabsTrigger>
+            <TabsTrigger value="battles">Battle History</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
           </TabsList>
 
@@ -83,6 +102,124 @@ const MyPokedex = () => {
                     imageUrl={pokemon.imageUrl}
                   />
                 ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="battles" className="space-y-6">
+            {/* Battle Stats Summary */}
+            {battleStats.totalBattles > 0 && (
+              <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-2xl p-4 sm:p-6 border-2 border-primary/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-foreground">Battle Statistics</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {battleStats.totalBattles} total battles fought
+                      {battleStats.mostBattled && (
+                        <> • Most battled: <span className="capitalize font-medium text-foreground">{battleStats.mostBattled.name}</span> ({battleStats.mostBattled.count} battles)</>
+                      )}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearHistory}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clear History
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Battle History List */}
+            {history.length === 0 ? (
+              <div className="text-center py-16 space-y-6">
+                <div className="w-24 h-24 mx-auto rounded-full bg-muted flex items-center justify-center opacity-50">
+                  <Swords className="w-12 h-12 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xl font-semibold text-foreground">
+                    No battles yet
+                  </p>
+                  <p className="text-muted-foreground">
+                    Head to the Battle Arena to start fighting!
+                  </p>
+                </div>
+                <Link to="/battle">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                    <Swords className="w-5 h-5 mr-2" />
+                    Go to Battle Arena
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3 animate-fade-in">
+                {history.map((battle) => {
+                  return (
+                    <div
+                      key={battle.id}
+                      className="bg-card rounded-xl p-4 border-2 border-border hover:border-primary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Pokemon 1 */}
+                        <Link to={`/pokemon/${battle.pokemon1.id}`} className="flex-shrink-0 group">
+                          <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden ${
+                            battle.winner === 1 ? "ring-2 ring-secondary ring-offset-2 ring-offset-card" : "opacity-70"
+                          }`}>
+                            <img
+                              src={battle.pokemon1.imageUrl}
+                              alt={battle.pokemon1.name}
+                              className="w-full h-full object-contain bg-muted/50 group-hover:scale-110 transition-transform"
+                            />
+                            {battle.winner === 1 && (
+                              <div className="absolute -top-1 -right-1 bg-secondary rounded-full p-1">
+                                <Crown className="w-3 h-3 text-secondary-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+
+                        {/* Battle Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`capitalize font-bold ${battle.winner === 1 ? "text-foreground" : "text-muted-foreground"}`}>
+                              {battle.pokemon1.name}
+                            </span>
+                            <span className="text-muted-foreground font-medium">vs</span>
+                            <span className={`capitalize font-bold ${battle.winner === 2 ? "text-foreground" : "text-muted-foreground"}`}>
+                              {battle.pokemon2.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span>{battle.totalRounds} rounds</span>
+                            <span>•</span>
+                            <span>{formatDate(battle.timestamp)}</span>
+                          </div>
+                        </div>
+
+                        {/* Pokemon 2 */}
+                        <Link to={`/pokemon/${battle.pokemon2.id}`} className="flex-shrink-0 group">
+                          <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden ${
+                            battle.winner === 2 ? "ring-2 ring-secondary ring-offset-2 ring-offset-card" : "opacity-70"
+                          }`}>
+                            <img
+                              src={battle.pokemon2.imageUrl}
+                              alt={battle.pokemon2.name}
+                              className="w-full h-full object-contain bg-muted/50 group-hover:scale-110 transition-transform"
+                            />
+                            {battle.winner === 2 && (
+                              <div className="absolute -top-1 -right-1 bg-secondary rounded-full p-1">
+                                <Crown className="w-3 h-3 text-secondary-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </TabsContent>

@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import PokemonSearchAutocomplete from "@/components/PokemonSearchAutocomplete";
 import { Button } from "@/components/ui/button";
 import { pokemonApi } from "@/services/pokemonApi";
 import { usePokemonCollection } from "@/hooks/usePokemonCollection";
+import { useBattleHistory } from "@/hooks/useBattleHistory";
 import { useToast } from "@/hooks/use-toast";
 import TypeBadge from "@/components/TypeBadge";
-import { Swords, Trophy, Zap, Library, Shuffle, ArrowRight } from "lucide-react";
+import { Swords, Library, Shuffle, Zap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,27 +18,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import confetti from "canvas-confetti";
+import { BattleArena } from "@/components/battle/BattleArena";
+import { BattleResult } from "@/types/battle";
 
 const Battle = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [pokemon1, setPokemon1] = useState<any>(null);
   const [pokemon2, setPokemon2] = useState<any>(null);
-  const [winner, setWinner] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState<1 | 2 | null>(null);
-  const [battleStats, setBattleStats] = useState<{ stats1: number; stats2: number; difference: number } | null>(null);
+  const [isBattling, setIsBattling] = useState(false);
+  const [lastResult, setLastResult] = useState<BattleResult | null>(null);
   const { collection } = usePokemonCollection();
+  const { addBattle } = useBattleHistory();
   const { toast } = useToast();
 
   // Load Pokemon from URL params
-  useState(() => {
+  useEffect(() => {
     const pokemonId = searchParams.get('pokemon');
     if (pokemonId) {
       loadPokemonById(parseInt(pokemonId), 1);
     }
-  });
+  }, [searchParams]);
 
   const loadPokemonById = async (id: number, slot: 1 | 2) => {
     try {
@@ -46,12 +48,11 @@ const Battle = () => {
       } else {
         setPokemon2(pokemon);
       }
-      setWinner(null);
-      setBattleStats(null);
+      setLastResult(null);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load Pokémon",
+        description: "Failed to load Pokemon",
         variant: "destructive",
       });
     }
@@ -61,7 +62,7 @@ const Battle = () => {
     await loadPokemonById(pokemonId, slot);
     setShowCollectionModal(null);
     toast({
-      title: "Pokémon Selected",
+      title: "Pokemon Selected",
       description: "Ready to battle!",
     });
   };
@@ -74,7 +75,7 @@ const Battle = () => {
     const randomId = Math.floor(Math.random() * 151) + 1;
     await loadPokemonById(randomId, slot);
     toast({
-      title: "Random Pokémon Selected!",
+      title: "Random Pokemon Selected!",
       description: "Ready to battle!",
     });
   };
@@ -82,29 +83,24 @@ const Battle = () => {
   const startBattle = () => {
     if (!pokemon1 || !pokemon2) {
       toast({
-        title: "Select Both Pokémon",
-        description: "You need to select two Pokémon to battle!",
+        title: "Select Both Pokemon",
+        description: "You need to select two Pokemon to battle!",
       });
       return;
     }
+    setIsBattling(true);
+  };
 
-    const stats1 = calculateStats(pokemon1);
-    const stats2 = calculateStats(pokemon2);
-    const difference = Math.abs(stats1 - stats2);
-
-    const winnerId = stats1 > stats2 ? 1 : stats2 > stats1 ? 2 : 0;
-    setWinner(winnerId);
-    setBattleStats({ stats1, stats2, difference });
-
-    if (winnerId !== 0) {
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#DC0A2D', '#FFCB05', '#3B4CCA', '#00FF00'],
-        ticks: 200,
-      });
+  const handleBattleComplete = (result: BattleResult) => {
+    setLastResult(result);
+    // Save battle to history
+    if (pokemon1 && pokemon2) {
+      addBattle(result, pokemon1, pokemon2);
     }
+  };
+
+  const handleCloseBattle = () => {
+    setIsBattling(false);
   };
 
   const PokemonSlot = ({ pokemon, slot }: { pokemon: any; slot: 1 | 2 }) => (
@@ -120,10 +116,9 @@ const Battle = () => {
               } else {
                 setPokemon2(p);
               }
-              setWinner(null);
-              setBattleStats(null);
+              setLastResult(null);
             }}
-            placeholder={`Search Player ${slot} Pokémon...`}
+            placeholder={`Search Player ${slot} Pokemon...`}
           />
         </div>
         <div className="flex gap-2">
@@ -132,7 +127,7 @@ const Battle = () => {
             size="icon" 
             className="h-12 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
             onClick={() => selectRandomPokemon(slot)}
-            title="Random Pokémon"
+            title="Random Pokemon"
           >
             <Shuffle className="w-5 h-5" />
           </Button>
@@ -146,7 +141,7 @@ const Battle = () => {
               <DialogHeader>
                 <DialogTitle>Select from Your Collection</DialogTitle>
                 <DialogDescription>
-                  Choose a Pokémon from your Pokédex to battle
+                  Choose a Pokemon from your Pokedex to battle
                 </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
@@ -154,7 +149,7 @@ const Battle = () => {
                   <div className="col-span-full text-center py-8 text-muted-foreground">
                     <p>Your collection is empty!</p>
                     <Link to="/browse">
-                      <Button className="mt-4">Browse Pokémon</Button>
+                      <Button className="mt-4">Browse Pokemon</Button>
                     </Link>
                   </div>
                 ) : (
@@ -187,23 +182,16 @@ const Battle = () => {
         <Link to={`/pokemon/${pokemon.id}`}>
           <div
             className={`relative bg-gradient-to-br from-card via-card to-muted rounded-3xl p-4 sm:p-6 border-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer ${
-              winner === slot
+              lastResult && lastResult.winner === slot
                 ? "border-secondary shadow-[0_0_40px_rgba(255,203,5,0.5)] scale-105"
-                : winner === 0 && winner !== null
-                ? "border-accent shadow-[0_0_30px_rgba(59,76,202,0.4)]"
+                : lastResult && lastResult.winner !== slot
+                ? "border-border opacity-70"
                 : "border-border hover:border-primary/50"
             }`}
           >
-            {winner === slot && (
+            {lastResult && lastResult.winner === slot && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-secondary via-yellow-400 to-secondary text-secondary-foreground px-6 py-2 rounded-full font-bold text-lg shadow-lg animate-bounce z-10 flex items-center gap-2">
-                <Trophy className="w-6 h-6" />
-                WINNER!
-              </div>
-            )}
-            
-            {winner === 0 && winner !== null && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-6 py-2 rounded-full font-bold text-lg shadow-lg animate-pulse z-10">
-                TIE!
+                <span>WINNER!</span>
               </div>
             )}
 
@@ -265,7 +253,7 @@ const Battle = () => {
           </div>
           <div className="text-center space-y-2">
             <p className="text-muted-foreground font-medium">Player {slot}</p>
-            <p className="text-sm text-muted-foreground/70">Select a Pokémon to battle</p>
+            <p className="text-sm text-muted-foreground/70">Select a Pokemon to battle</p>
           </div>
         </div>
       )}
@@ -292,36 +280,18 @@ const Battle = () => {
             </p>
           </div>
 
-          {/* Battle Result */}
-          {winner !== null && battleStats && (
-            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-2xl p-4 sm:p-6 border-2 border-primary/30 animate-fade-in">
-              <div className="text-center space-y-3">
-                <div className="flex items-center justify-center gap-3 flex-wrap">
-                  <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-secondary animate-bounce" />
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-                    {winner === 0 ? "It's a Tie!" : `${winner === 1 ? pokemon1.name : pokemon2.name} Wins!`}
-                  </h2>
-                  <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-secondary animate-bounce" />
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-base sm:text-lg">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-bold text-xl sm:text-2xl ${winner === 1 ? 'text-secondary' : 'text-muted-foreground'}`}>
-                      {battleStats.stats1}
-                    </span>
-                    <span className="text-muted-foreground">vs</span>
-                    <span className={`font-bold text-xl sm:text-2xl ${winner === 2 ? 'text-secondary' : 'text-muted-foreground'}`}>
-                      {battleStats.stats2}
-                    </span>
-                  </div>
-                  {winner !== 0 && (
-                    <div className="flex items-center gap-2 bg-card/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
-                      <span className="font-semibold text-secondary text-sm sm:text-base">
-                        Won by {battleStats.difference} points!
-                      </span>
-                    </div>
-                  )}
-                </div>
+          {/* Last Battle Result Summary */}
+          {lastResult && (
+            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-2xl p-4 sm:p-6 border-2 border-primary/30">
+              <div className="text-center space-y-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+                  {lastResult.winnerName} won in {lastResult.totalRounds} rounds!
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Total damage dealt: {lastResult.totalDamageDealt.pokemon1 + lastResult.totalDamageDealt.pokemon2} |
+                  Critical hits: {lastResult.criticalHits.pokemon1 + lastResult.criticalHits.pokemon2} |
+                  Super effective: {lastResult.superEffectiveHits.pokemon1 + lastResult.superEffectiveHits.pokemon2}
+                </p>
               </div>
             </div>
           )}
@@ -364,6 +334,18 @@ const Battle = () => {
           </div>
         </div>
       </main>
+
+      {/* Battle Arena Overlay */}
+      <AnimatePresence>
+        {isBattling && pokemon1 && pokemon2 && (
+          <BattleArena
+            pokemon1Data={pokemon1}
+            pokemon2Data={pokemon2}
+            onBattleComplete={handleBattleComplete}
+            onClose={handleCloseBattle}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
