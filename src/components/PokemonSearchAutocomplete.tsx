@@ -5,24 +5,35 @@ import { pokemonApi } from "@/services/pokemonApi";
 import { cn } from "@/lib/utils";
 
 interface PokemonSearchAutocompleteProps {
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   onSelect: (pokemon: any) => void;
   placeholder?: string;
   className?: string;
 }
 
 const PokemonSearchAutocomplete = ({
-  value,
-  onChange,
+  value: externalValue,
+  onChange: externalOnChange,
   onSelect,
   placeholder = "Search Pokémon by name or ID...",
   className,
 }: PokemonSearchAutocompleteProps) => {
+  // Use internal state if no external value is provided
+  const [internalValue, setInternalValue] = useState("");
+  const value = externalValue !== undefined ? externalValue : internalValue;
+  
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const handleChange = (newValue: string) => {
+    setInternalValue(newValue);
+    if (externalOnChange) {
+      externalOnChange(newValue);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,6 +84,7 @@ const PokemonSearchAutocomplete = ({
 
   const handleSelect = (pokemon: any) => {
     onSelect(pokemon);
+    setInternalValue(""); // Clear internal value after selection
     setIsOpen(false);
     setSuggestions([]);
   };
@@ -85,7 +97,7 @@ const PokemonSearchAutocomplete = ({
           type="text"
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onFocus={() => suggestions.length > 0 && setIsOpen(true)}
           className="pl-10 pr-10 h-12 text-lg border-2 focus-visible:ring-primary"
         />

@@ -32,44 +32,68 @@ const MyPokedex = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-8" role="main">
-        <div className="mb-6 sm:mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-                My Pokédex
-              </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">
-                You have caught {collection.length} Pokémon • {unlockedCount} achievements unlocked
-              </p>
+          <div className="grid gap-6 sm:gap-8 mb-8 sm:mb-12">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  My Pokédex
+                </h1>
+                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">
+                  Track your journey to become a Pokémon Master. Manage your collection, build your dream team, and review your battle history.
+                </p>
+              </div>
+              
+              <div className="flex gap-4 w-full md:w-auto">
+                <div className="flex-1 md:flex-none bg-card/50 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border shadow-sm flex flex-col items-center min-w-[100px] hover:border-primary/50 transition-colors">
+                  <div className="bg-primary/10 p-2 rounded-full mb-2">
+                    <Trophy className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{unlockedCount}</span>
+                  <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider">Awards</span>
+                </div>
+                
+                <div className="flex-1 md:flex-none bg-card/50 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border shadow-sm flex flex-col items-center min-w-[100px] hover:border-secondary/50 transition-colors">
+                  <div className="bg-secondary/10 p-2 rounded-full mb-2">
+                    <Star className="w-5 h-5 text-secondary" />
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{collection.length}</span>
+                  <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider">Caught</span>
+                </div>
+                
+                <div className="flex-1 md:flex-none bg-card/50 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border shadow-sm flex flex-col items-center min-w-[100px] hover:border-accent/50 transition-colors">
+                  <div className="bg-accent/10 p-2 rounded-full mb-2">
+                    <Swords className="w-5 h-5 text-accent" />
+                  </div>
+                  <span className="text-2xl font-bold text-foreground">{battleStats.totalBattles}</span>
+                  <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider">Battles</span>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
-              <div className="flex-1 sm:flex-none bg-primary/10 rounded-xl px-4 sm:px-6 py-3 text-center border-2 border-primary/30">
-                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-primary mx-auto mb-1" />
-                <p className="text-xl sm:text-2xl font-bold text-foreground">{unlockedCount}</p>
-                <p className="text-xs text-muted-foreground uppercase">Achievements</p>
-              </div>
-              <div className="flex-1 sm:flex-none bg-secondary/10 rounded-xl px-4 sm:px-6 py-3 text-center border-2 border-secondary/30">
-                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary mx-auto mb-1" />
-                <p className="text-xl sm:text-2xl font-bold text-foreground">{collection.length}</p>
-                <p className="text-xs text-muted-foreground uppercase">Caught</p>
-              </div>
-              <div className="flex-1 sm:flex-none bg-accent/10 rounded-xl px-4 sm:px-6 py-3 text-center border-2 border-accent/30">
-                <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-accent mx-auto mb-1" />
-                <p className="text-xl sm:text-2xl font-bold text-foreground">{battleStats.totalBattles}</p>
-                <p className="text-xs text-muted-foreground uppercase">Battles</p>
-              </div>
-            </div>
+
+            <TeamBuilder />
           </div>
 
-          <TeamBuilder />
-        </div>
-
-        <Tabs defaultValue="collection" className="space-y-6">
-          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3">
-            <TabsTrigger value="collection">Collection</TabsTrigger>
-            <TabsTrigger value="battles">Battle History</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="collection" className="space-y-8">
+            <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-3 h-12 bg-muted/50 p-1 rounded-full">
+              <TabsTrigger 
+                value="collection" 
+                className="rounded-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Collection
+              </TabsTrigger>
+              <TabsTrigger 
+                value="battles" 
+                className="rounded-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Battle History
+              </TabsTrigger>
+              <TabsTrigger 
+                value="achievements" 
+                className="rounded-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+              >
+                Achievements
+              </TabsTrigger>
+            </TabsList>
 
           <TabsContent value="collection" className="space-y-6">
             {collection.length === 0 ? (

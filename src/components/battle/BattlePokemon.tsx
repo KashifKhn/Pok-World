@@ -97,8 +97,11 @@ export function BattlePokemon({
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center',
-        isPlayer ? 'self-end' : 'self-start'
+        'relative flex items-center justify-center pointer-events-none', // Added pointer-events-none
+        isPlayer ? 'self-end' : 'self-start',
+        // Lift the sprite container up using negative margin to fix "below center" issue
+        // Player (back) is usually lower, so we lift it less than the opponent
+        isPlayer ? '-mt-24 md:-mt-32' : '-mt-32 md:-mt-48'
       )}
     >
       {/* Type-based aura effect */}
@@ -122,7 +125,8 @@ export function BattlePokemon({
       <motion.div
         className={cn(
           'relative z-10',
-          isPlayer ? 'w-32 h-32 md:w-40 md:h-40' : 'w-28 h-28 md:w-36 md:h-36',
+          // Increased base size for better visibility
+          isPlayer ? 'w-48 h-48 md:w-64 md:h-64' : 'w-40 h-40 md:w-56 md:h-56',
           // CSS animation for shake effect (avoids Framer Motion keyframe issue)
           isBeingHit && 'animate-shake'
         )}
@@ -131,10 +135,10 @@ export function BattlePokemon({
       >
         {/* Shadow beneath Pokemon */}
         <motion.div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-black/30 rounded-full blur-sm"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-6 bg-black/40 rounded-full blur-md"
           animate={{
             scaleX: isDefeated ? 0 : 1,
-            opacity: isDefeated ? 0 : 0.5,
+            opacity: isDefeated ? 0 : 0.6,
           }}
           transition={{ duration: 0.3 }}
         />
@@ -145,7 +149,7 @@ export function BattlePokemon({
           alt={name}
           className={cn(
             'w-full h-full object-contain',
-            'drop-shadow-lg',
+            'drop-shadow-2xl', // Enhanced shadow
             isBeingHit && 'brightness-150'
           )}
           style={{
@@ -160,7 +164,7 @@ export function BattlePokemon({
         <AnimatePresence>
           {isBeingHit && !isDefeated && (
             <motion.div
-              className="absolute inset-0 bg-white/60 rounded-lg"
+              className="absolute inset-0 bg-white/60 rounded-full blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

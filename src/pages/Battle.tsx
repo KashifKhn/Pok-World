@@ -103,13 +103,11 @@ const Battle = () => {
     setIsBattling(false);
   };
 
-  const PokemonSlot = ({ pokemon, slot }: { pokemon: any; slot: 1 | 2 }) => (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="flex-1">
+const PokemonSlot = ({ pokemon, slot }: { pokemon: any; slot: 1 | 2 }) => (
+    <div className="space-y-4 group">
+      <div className="flex flex-col gap-3">
+        <div className="relative">
           <PokemonSearchAutocomplete
-            value=""
-            onChange={() => {}}
             onSelect={(p) => {
               if (slot === 1) {
                 setPokemon1(p);
@@ -121,35 +119,39 @@ const Battle = () => {
             placeholder={`Search Player ${slot} Pokemon...`}
           />
         </div>
-        <div className="flex gap-2">
+        
+        <div className="flex gap-2 justify-end">
           <Button 
-            variant="outline" 
-            size="icon" 
-            className="h-12 w-12 hover:bg-primary hover:text-primary-foreground transition-colors"
+            variant="ghost" 
+            size="sm" 
+            className="hover:bg-primary/10 hover:text-primary transition-colors gap-2"
             onClick={() => selectRandomPokemon(slot)}
-            title="Random Pokemon"
           >
-            <Shuffle className="w-5 h-5" />
+            <Shuffle className="w-4 h-4" />
+            <span className="text-xs font-medium">Random</span>
           </Button>
+          
           <Dialog open={showCollectionModal === slot} onOpenChange={(open) => setShowCollectionModal(open ? slot : null)}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="h-12 w-12 hover:bg-secondary hover:text-secondary-foreground transition-colors">
-                <Library className="w-5 h-5" />
+              <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-colors gap-2">
+                <Library className="w-4 h-4" />
+                <span className="text-xs font-medium">My Collection</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Select from Your Collection</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">Select from Your Collection</DialogTitle>
                 <DialogDescription>
-                  Choose a Pokemon from your Pokedex to battle
+                  Choose a formidable companion for battle
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                 {collection.length === 0 ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <p>Your collection is empty!</p>
+                  <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-xl border-2 border-dashed">
+                    <Library className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Your collection is empty!</p>
                     <Link to="/browse">
-                      <Button className="mt-4">Browse Pokemon</Button>
+                      <Button variant="link" className="mt-2 text-primary">Browse Pokemon to catch some!</Button>
                     </Link>
                   </div>
                 ) : (
@@ -157,18 +159,18 @@ const Battle = () => {
                     <button
                       key={p.id}
                       onClick={() => selectFromCollection(p.id, slot)}
-                      className="bg-card rounded-xl p-3 border-2 border-border hover:border-primary transition-all duration-200 hover:scale-105 group"
+                      className="group/card relative flex flex-col items-center p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300"
                     >
-                      <div className="aspect-square bg-muted/50 rounded-lg mb-2">
+                      <div className="w-24 h-24 mb-3 relative">
+                         <div className="absolute inset-0 bg-primary/5 rounded-full blur-xl group-hover/card:bg-primary/10 transition-colors" />
                         <img
                           src={p.imageUrl}
                           alt={p.name}
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-200"
+                          className="w-full h-full object-contain relative z-10 group-hover/card:scale-110 transition-transform duration-300"
                         />
                       </div>
-                      <p className="text-sm font-bold capitalize text-foreground truncate">
-                        {p.name}
-                      </p>
+                      <p className="font-bold capitalize text-foreground">{p.name}</p>
+                      <span className="text-xs text-muted-foreground font-mono">#{String(p.id).padStart(3, "0")}</span>
                     </button>
                   ))
                 )}
@@ -179,81 +181,113 @@ const Battle = () => {
       </div>
 
       {pokemon ? (
-        <Link to={`/pokemon/${pokemon.id}`}>
+        <Link to={`/pokemon/${pokemon.id}`} className="block relative z-10">
           <div
-            className={`relative bg-gradient-to-br from-card via-card to-muted rounded-3xl p-4 sm:p-6 border-4 transition-all duration-500 hover:scale-[1.02] cursor-pointer ${
-              lastResult && lastResult.winner === slot
-                ? "border-secondary shadow-[0_0_40px_rgba(255,203,5,0.5)] scale-105"
+            className={`
+              relative overflow-hidden rounded-[2rem] p-6 transition-all duration-500
+              bg-card border-2
+              ${lastResult && lastResult.winner === slot
+                ? "border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.3)] scale-[1.02]"
                 : lastResult && lastResult.winner !== slot
-                ? "border-border opacity-70"
-                : "border-border hover:border-primary/50"
-            }`}
+                ? "border-transparent opacity-80 grayscale-[0.5]"
+                : "border-border/50 hover:border-primary/30 hover:shadow-xl shadow-lg"
+              }
+            `}
           >
+            {/* Background Decor */}
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-gradient-to-tr from-secondary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+            {/* Winner Badge */}
             {lastResult && lastResult.winner === slot && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-secondary via-yellow-400 to-secondary text-secondary-foreground px-6 py-2 rounded-full font-bold text-lg shadow-lg animate-bounce z-10 flex items-center gap-2">
-                <span>WINNER!</span>
+              <div className="absolute top-4 right-4 z-20">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                </span>
               </div>
             )}
 
-            <div className="aspect-square bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-2xl flex items-center justify-center p-4 sm:p-6 mb-4 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <img
-                src={pokemonApi.getImageUrl(pokemon.id)}
-                alt={pokemon.name}
-                className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 relative z-10 drop-shadow-2xl"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="text-center">
-                <h3 className="text-xl sm:text-2xl font-bold capitalize text-foreground mb-1">
-                  {pokemon.name}
-                </h3>
-                <p className="text-sm text-muted-foreground font-mono">#{String(pokemon.id).padStart(3, "0")}</p>
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="relative w-48 h-48 mb-6 group-hover:scale-105 transition-transform duration-500">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/20 dark:from-white/5 dark:to-white/10 rounded-full blur-2xl transform scale-75 translate-y-4" />
+                <img
+                  src={pokemonApi.getImageUrl(pokemon.id)}
+                  alt={pokemon.name}
+                  className="w-full h-full object-contain drop-shadow-2xl relative z-10"
+                />
               </div>
 
-              <div className="flex gap-2 justify-center flex-wrap">
-                {pokemon.types.map((t: any) => (
-                  <TypeBadge key={t.type.name} type={t.type.name} />
-                ))}
-              </div>
+              <div className="text-center w-full space-y-4">
+                <div>
+                  <h3 className="text-3xl font-black capitalize text-foreground tracking-tight mb-1">
+                    {pokemon.name}
+                  </h3>
+                  <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+                    <span>#{String(pokemon.id).padStart(3, "0")}</span>
+                  </div>
+                </div>
 
-              <div className="bg-gradient-to-br from-muted/50 to-muted rounded-xl p-3 sm:p-4 space-y-2 border border-border/50">
-                <p className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wide">
-                  Combat Stats
-                </p>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {pokemon.stats.slice(0, 3).map((s: any) => (
-                    <div key={s.stat.name} className="bg-card/50 rounded-lg p-2">
-                      <p className="text-xs text-muted-foreground capitalize truncate">
-                        {s.stat.name.split('-')[0]}
-                      </p>
-                      <p className="text-lg sm:text-xl font-bold text-foreground">{s.base_stat}</p>
-                    </div>
+                <div className="flex justify-center gap-2">
+                  {pokemon.types.map((t: any) => (
+                    <TypeBadge key={t.type.name} type={t.type.name} className="px-3 py-1 text-xs" />
                   ))}
                 </div>
-                <div className="pt-2 border-t-2 border-primary/30 mt-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-foreground font-bold text-sm sm:text-base">Total Power</span>
-                    <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                      {calculateStats(pokemon)}
-                    </span>
+
+                <div className="grid grid-cols-3 gap-3 w-full pt-4 border-t border-border/50">
+                  <div className="flex flex-col items-center p-2 rounded-lg bg-background/50">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">HP</span>
+                    <span className="text-lg font-bold text-foreground">{pokemon.stats[0].base_stat}</span>
                   </div>
+                  <div className="flex flex-col items-center p-2 rounded-lg bg-background/50">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">ATK</span>
+                    <span className="text-lg font-bold text-foreground">{pokemon.stats[1].base_stat}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 rounded-lg bg-background/50">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">SPD</span>
+                    <span className="text-lg font-bold text-foreground">{pokemon.stats[5].base_stat}</span>
+                  </div>
+                </div>
+
+                <div className="w-full bg-muted/50 rounded-full h-2 overflow-hidden mt-4">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-secondary" 
+                    style={{ width: `${Math.min((calculateStats(pokemon) / 700) * 100, 100)}%` }} 
+                  />
+                </div>
+                <div className="flex justify-between text-xs font-medium text-muted-foreground px-1">
+                  <span>Combat Power</span>
+                  <span className="text-foreground font-bold">{calculateStats(pokemon)}</span>
                 </div>
               </div>
             </div>
           </div>
         </Link>
       ) : (
-        <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-3xl p-8 sm:p-12 border-2 border-dashed border-border flex flex-col items-center justify-center gap-4 min-h-[300px] sm:min-h-[400px]">
+        <div 
+          onClick={() => document.getElementById(`search-trigger-${slot}`)?.focus()}
+          className="
+            group relative h-[400px] rounded-[2rem] border-2 border-dashed border-muted-foreground/20 
+            hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 cursor-pointer
+            flex flex-col items-center justify-center text-center p-8 gap-6
+          "
+        >
           <div className="relative">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center animate-pulse">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-card border-4 border-foreground/30"></div>
+            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300 group-hover:shadow-lg">
+               <span className="text-4xl font-black text-muted-foreground/50 group-hover:text-primary/50 transition-colors">?</span>
             </div>
+            {slot === 1 && (
+               <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg">1</div>
+            )}
+            {slot === 2 && (
+               <div className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg">2</div>
+            )}
           </div>
-          <div className="text-center space-y-2">
-            <p className="text-muted-foreground font-medium">Player {slot}</p>
-            <p className="text-sm text-muted-foreground/70">Select a Pokemon to battle</p>
+          <div className="space-y-2 max-w-[200px]">
+            <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Select Fighter</h3>
+            <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80">
+              Choose a Pokemon to enter the arena
+            </p>
           </div>
         </div>
       )}
@@ -261,75 +295,110 @@ const Battle = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
+      {/* Sticky Navigation */}
       <Navigation />
       
-      <main className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Swords className="w-10 h-10 sm:w-12 sm:h-12 text-primary animate-pulse" />
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                Battle Arena
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[100px]" />
+      </div>
+      
+      <main className="container relative mx-auto px-4 py-8 lg:py-12">
+        <div className="max-w-6xl mx-auto space-y-12">
+          
+          {/* Header Section */}
+          <div className="relative text-center space-y-6 py-8">
+            <div className="flex items-center justify-center gap-6 relative z-10">
+              <Swords 
+                className="w-12 h-12 lg:w-16 lg:h-16 text-primary animate-[spin_3s_linear_infinite_reverse]" 
+                style={{ filter: "drop-shadow(0 0 10px rgba(220, 38, 38, 0.5))" }}
+              />
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter">
+                <span className="bg-gradient-to-r from-primary via-red-500 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
+                  BATTLE
+                </span>
+                <span className="block text-2xl md:text-3xl font-medium tracking-widest text-muted-foreground uppercase mt-2">
+                  Arena
+                </span>
               </h1>
-              <Swords className="w-10 h-10 sm:w-12 sm:h-12 text-secondary animate-pulse" />
+              <Swords 
+                className="w-12 h-12 lg:w-16 lg:h-16 text-secondary animate-[spin_3s_linear_infinite]" 
+                style={{ filter: "drop-shadow(0 0 10px rgba(37, 99, 235, 0.5))" }}
+              />
             </div>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Choose your fighters and let the battle begin!
-            </p>
           </div>
 
-          {/* Last Battle Result Summary */}
+          {/* Last Battle Result Alert */}
           {lastResult && (
-            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-2xl p-4 sm:p-6 border-2 border-primary/30">
-              <div className="text-center space-y-2">
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-                  {lastResult.winnerName} won in {lastResult.totalRounds} rounds!
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 max-w-2xl mx-auto shadow-sm">
+              <div className="flex flex-col items-center text-center space-y-2">
+                <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+                  Last Battle Report
+                </span>
+                <h2 className="text-2xl font-bold">
+                  {lastResult.winnerName} <span className="text-muted-foreground font-normal">dominated in</span> {lastResult.totalRounds} rounds
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Total damage dealt: {lastResult.totalDamageDealt.pokemon1 + lastResult.totalDamageDealt.pokemon2} |
-                  Critical hits: {lastResult.criticalHits.pokemon1 + lastResult.criticalHits.pokemon2} |
-                  Super effective: {lastResult.superEffectiveHits.pokemon1 + lastResult.superEffectiveHits.pokemon2}
-                </p>
+                <div className="flex gap-4 text-sm text-muted-foreground mt-2">
+                  <span className="flex items-center gap-1"><Zap className="w-4 h-4" /> {lastResult.totalDamageDealt.pokemon1 + lastResult.totalDamageDealt.pokemon2} dmg</span>
+                  <span className="w-px h-4 bg-border" />
+                  <span>{lastResult.criticalHits.pokemon1 + lastResult.criticalHits.pokemon2} crits</span>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Battle Grid */}
-          <div className="grid lg:grid-cols-[1fr_auto_1fr] gap-6 sm:gap-8 items-center">
+          {/* Main Battle Grid */}
+          <div className="relative grid lg:grid-cols-[1fr_auto_1fr] gap-8 items-stretch">
             {/* Player 1 */}
-            <PokemonSlot pokemon={pokemon1} slot={1} />
+            <div className="relative z-10">
+              <div className="absolute -left-4 top-1/2 -translate-y-1/2 -z-10 text-[10rem] font-black text-muted/20 select-none hidden xl:block">01</div>
+              <PokemonSlot pokemon={pokemon1} slot={1} />
+            </div>
 
             {/* VS Divider */}
-            <div className="flex lg:flex-col items-center justify-center gap-4 lg:gap-6 py-4">
-              <div className="hidden lg:block relative">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center animate-pulse shadow-[0_0_30px_rgba(220,10,45,0.5)]">
-                  <Zap className="w-12 h-12 text-white drop-shadow-lg" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 rounded-full blur-xl"></div>
-              </div>
-              <div className="lg:hidden w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-              <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                VS
-              </p>
-              <div className="lg:hidden w-full h-px bg-gradient-to-r from-transparent via-secondary to-transparent"></div>
+            <div className="flex lg:flex-col items-center justify-center py-6 relative z-0">
+               <div className="relative">
+                 <div className="absolute inset-0 bg-gradient-to-b from-primary via-purple-500 to-secondary opacity-20 blur-2xl" />
+                 <div className="w-16 h-16 md:w-20 md:h-20 bg-background border-4 border-muted rounded-full flex items-center justify-center shadow-xl z-10 relative">
+                   <span className="font-black text-2xl md:text-3xl italic bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent pr-1">VS</span>
+                 </div>
+               </div>
+               
+               {/* Connecting Lines (Desktop) */}
+               <div className="hidden lg:block absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border to-transparent -z-10" />
+               
+               {/* Connecting Lines (Mobile) */}
+               <div className="lg:hidden absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent -z-10" />
             </div>
 
             {/* Player 2 */}
-            <PokemonSlot pokemon={pokemon2} slot={2} />
+            <div className="relative z-10">
+              <div className="absolute -right-4 top-1/2 -translate-y-1/2 -z-10 text-[10rem] font-black text-muted/20 select-none hidden xl:block">02</div>
+              <PokemonSlot pokemon={pokemon2} slot={2} />
+            </div>
           </div>
 
-          {/* Battle Button */}
-          <div className="text-center pb-4 sm:pb-8">
+          {/* Action Area */}
+          <div className="flex justify-center pt-8 pb-16">
             <Button
               size="lg"
               onClick={startBattle}
               disabled={!pokemon1 || !pokemon2}
-              className="bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 text-white px-8 sm:px-12 py-5 sm:py-6 text-lg sm:text-xl font-bold rounded-2xl shadow-[0_0_30px_rgba(220,10,45,0.4)] hover:shadow-[0_0_50px_rgba(220,10,45,0.6)] transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className={`
+                relative overflow-hidden group px-12 py-8 rounded-full text-xl font-black tracking-wide shadow-2xl transition-all duration-300
+                ${(!pokemon1 || !pokemon2) 
+                  ? "bg-muted text-muted-foreground opacity-50 cursor-not-allowed" 
+                  : "bg-foreground text-background hover:scale-105 hover:shadow-[0_0_40px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
+                }
+              `}
             >
-              <Swords className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-              Start Battle!
+              <div className="absolute inset-0 bg-gradient-to-r from-primary via-purple-500 to-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative z-10 flex items-center gap-3">
+                {(!pokemon1 || !pokemon2) ? "SELECT FIGHTERS" : "START BATTLE"}
+                {!(!pokemon1 || !pokemon2) && <Swords className="w-6 h-6 animate-pulse" />}
+              </span>
             </Button>
           </div>
         </div>

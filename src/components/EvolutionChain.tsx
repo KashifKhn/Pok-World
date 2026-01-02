@@ -110,31 +110,32 @@ const EvolutionChain = ({ pokemonId }: EvolutionChainProps) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-accent/20 via-primary/20 to-secondary/20 rounded-2xl p-8 border-2 border-accent/30 shadow-lg">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-accent" />
+    <div className="bg-card/50 backdrop-blur-sm rounded-3xl shadow-xl p-8 border border-border">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+          <span className="w-2 h-8 bg-accent rounded-full"></span>
           Evolution Chain
         </h2>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {currentStage > 0 && (
             <Button
               onClick={handleDevolve}
               disabled={isEvolving}
               variant="outline"
-              className="border-accent text-accent hover:bg-accent/10"
+              className="rounded-xl border-2 border-accent text-accent hover:bg-accent/10 hover:text-accent"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
-              {isEvolving ? "Changing..." : `Back to ${evolutionChain[currentStage - 1].name}`}
+              <span className="capitalize hidden sm:inline">{evolutionChain[currentStage - 1].name}</span>
             </Button>
           )}
           {currentStage < evolutionChain.length - 1 && (
             <Button
               onClick={handleEvolve}
               disabled={isEvolving}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              className="rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20"
             >
-              {isEvolving ? "Evolving..." : `Evolve to ${evolutionChain[currentStage + 1].name}`}
+              <span className="capitalize hidden sm:inline">Evolve to {evolutionChain[currentStage + 1].name}</span>
+              <span className="sm:hidden">Evolve</span>
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           )}
@@ -142,60 +143,64 @@ const EvolutionChain = ({ pokemonId }: EvolutionChainProps) => {
       </div>
 
       <div className="relative">
-        {/* Evolution stages display */}
-        <div className="flex items-center justify-center gap-4 overflow-x-auto pb-4 px-4">
+        <div className="flex items-center justify-start md:justify-center gap-4 lg:gap-8 overflow-x-auto pb-12 pt-4 px-4 min-h-[350px] snap-x snap-mandatory scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent">
           {evolutionChain.map((stage, index) => (
-            <div key={stage.id} className="flex items-center gap-4">
+            <div key={stage.id} className="flex items-center gap-4 lg:gap-8 snap-center">
               <Link
                 to={`/pokemon/${stage.id}`}
-                className={`group relative transition-all duration-500 flex-shrink-0 ${
+                className={`group relative transition-all duration-500 flex-shrink-0 outline-none focus:outline-none ${
                   index === currentStage
-                    ? "scale-110 z-10"
+                    ? "scale-100 z-10"
                     : index < currentStage
-                    ? "opacity-60 scale-95"
-                    : "opacity-40 scale-90"
+                    ? "opacity-70 scale-95 grayscale-[0.3] hover:opacity-100 hover:scale-100 hover:grayscale-0"
+                    : "opacity-50 scale-95 grayscale-[0.6] hover:opacity-80 hover:scale-100 hover:grayscale-0"
                 }`}
               >
                 <div
-                  className={`relative bg-card rounded-2xl p-6 border-4 transition-all duration-500 min-w-[200px] ${
-                    index === currentStage
-                      ? "border-accent shadow-2xl shadow-accent/50"
-                      : "border-border"
-                  } ${
-                    isEvolving && (index === currentStage + 1 || index === currentStage - 1)
-                      ? "animate-pulse"
-                      : ""
-                  }`}
+                  className={`
+                    relative bg-card rounded-[2rem] p-6 transition-all duration-500 w-[240px] flex flex-col items-center
+                    border
+                    ${index === currentStage
+                      ? "border-accent shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_40px_-10px_rgba(255,255,255,0.1)] ring-4 ring-accent/10"
+                      : "border-border shadow-sm hover:border-accent/50 hover:shadow-md"
+                    }
+                  `}
                 >
                   {isEvolving && index === currentStage && (
-                    <div className="absolute inset-0 bg-accent/20 rounded-2xl animate-ping"></div>
+                    <div className="absolute inset-0 bg-accent/20 rounded-[2rem] animate-ping duration-1000"></div>
                   )}
                   
                   {index === currentStage && (
-                    <div className="absolute -top-3 -right-3 bg-accent text-accent-foreground rounded-full p-2 shadow-lg">
-                      <Sparkles className="w-5 h-5 animate-spin" />
+                    <div className="absolute -top-4 -right-4 bg-accent text-accent-foreground rounded-full p-2.5 shadow-xl z-20 scale-110">
+                      <Sparkles className="w-5 h-5 animate-[spin_3s_linear_infinite]" />
                     </div>
                   )}
 
-                  <div className="w-32 h-32 bg-gradient-to-br from-muted to-transparent rounded-xl flex items-center justify-center p-4 mb-3">
+                  <div className="w-40 h-40 mb-6 relative z-10 mt-2">
+                    <div className={`
+                      absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-2xl transition-all duration-500
+                      ${index === currentStage ? "opacity-100 scale-125" : "opacity-0 scale-75 group-hover:opacity-50 group-hover:scale-100"}
+                    `} />
                     <img
                       src={stage.imageUrl}
                       alt={stage.name}
-                      className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-110 ${
-                        isEvolving && index === currentStage
-                          ? "animate-pulse brightness-150"
-                          : ""
-                      }`}
+                      className={`
+                        w-full h-full object-contain relative z-10 drop-shadow-xl transition-transform duration-500 
+                        ${index === currentStage ? "group-hover:scale-110" : "group-hover:scale-110"}
+                        ${isEvolving && index === currentStage ? "animate-pulse brightness-150" : ""}
+                      `}
                     />
                   </div>
 
-                  <div className="text-center space-y-2">
-                    <p className="font-bold capitalize text-foreground text-lg">
+                  <div className="text-center w-full relative z-10 mb-2">
+                    <p className={`font-black capitalize text-xl mb-3 transition-colors ${
+                      index === currentStage ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    }`}>
                       {stage.name}
                     </p>
-                    <div className="flex gap-1 justify-center flex-wrap">
+                    <div className="flex gap-1.5 justify-center flex-wrap">
                       {stage.types.map((type) => (
-                        <TypeBadge key={type} type={type} size="sm" />
+                        <TypeBadge key={type} type={type} className="px-2.5 py-1 text-xs shadow-sm" />
                       ))}
                     </div>
                   </div>
@@ -203,33 +208,31 @@ const EvolutionChain = ({ pokemonId }: EvolutionChainProps) => {
               </Link>
 
               {index < evolutionChain.length - 1 && (
-                <div className={`transition-all duration-500 ${
-                  index < currentStage ? "text-accent" : "text-muted-foreground"
-                }`}>
-                  <ArrowRight
-                    className={`w-8 h-8 ${
-                      isEvolving && index === currentStage ? "animate-pulse" : ""
-                    }`}
-                  />
+                <div className="flex flex-col items-center justify-center">
+                   <ArrowRight className={`w-6 h-6 sm:w-8 sm:h-8 transition-colors duration-500 ${
+                     index < currentStage ? "text-accent" : "text-border"
+                   }`} />
                 </div>
               )}
             </div>
           ))}
         </div>
 
-        {/* Progress indicator */}
-        <div className="mt-6 bg-muted rounded-full h-3 overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-accent via-primary to-secondary h-full transition-all duration-1000 rounded-full"
-            style={{
-              width: `${((currentStage + 1) / evolutionChain.length) * 100}%`,
-            }}
-          />
+        {/* Enhanced Progress Bar */}
+        <div className="mt-8 max-w-md mx-auto">
+          <div className="flex justify-between text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">
+            <span>Progress</span>
+            <span>{Math.round(((currentStage + 1) / evolutionChain.length) * 100)}%</span>
+          </div>
+          <div className="bg-muted rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-accent h-full transition-all duration-1000 rounded-full shadow-[0_0_10px_rgba(var(--accent),0.5)]"
+              style={{
+                width: `${((currentStage + 1) / evolutionChain.length) * 100}%`,
+              }}
+            />
+          </div>
         </div>
-
-        <p className="text-center mt-3 text-sm text-muted-foreground">
-          Stage {currentStage + 1} of {evolutionChain.length}
-        </p>
       </div>
     </div>
   );

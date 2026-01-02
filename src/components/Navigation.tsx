@@ -16,7 +16,7 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-card border-b-2 border-border sticky top-0 z-50 shadow-lg">
+    <nav className="bg-card/95 backdrop-blur-md border-b-2 border-border sticky top-0 z-50 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           <Link
